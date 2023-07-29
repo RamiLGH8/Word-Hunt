@@ -1,0 +1,148 @@
+#ifndef FUNCTION_H_INCLUDED
+#define FUNCTION_H_INCLUDED
+#include <stdbool.h>
+#include"game.h"
+
+typedef struct cellule* liste;
+typedef struct cellule{
+     char combinaison[26];
+     char etat[26];
+     struct cellule *suiv;
+}cellule ;
+
+char s[9],ce[9],cbn[9],ett[9];
+liste temp,temp2,ctemp,ctemp2;
+
+
+bool Existance(liste Tete1,liste cel){
+     bool Trouver=false;
+        while(Trouver==false && Tete1!=NULL){
+            if((strcmp((char *)cel->combinaison,(char *)Tete1->combinaison)==0) && (strcmp((char *)cel->etat,(char *)Tete1->etat)==0)){
+                Trouver=true;
+            }
+            Tete1=Tete1->suiv;
+        }
+     return Trouver;
+}
+
+void Detruire_Liste(liste Tete){
+    liste pre=Tete;
+    while(Tete!=NULL){
+        Tete=Tete->suiv;
+        free(pre);
+        pre=Tete;
+    }
+}
+
+void Ajouter_Nouv(liste precedent,char combin[],char etat[]){
+        liste nouv;
+        nouv=malloc(sizeof( cellule));
+        strcpy((char *)nouv->combinaison,combin);
+        strcpy((char *)nouv->etat,etat);
+        precedent->suiv=nouv;
+        nouv->suiv=NULL;
+
+}
+
+int CheckRotation(liste combin,int position,int naj,char newcombinaison[],char newetat[] ){
+        int l=position+naj-1;
+        if (l>(strlen(combin->combinaison)-1)){
+                 return -1;
+        }
+         return 0;
+}
+
+void Rotation(liste combin,int position,int naj,char newcombinaison[],char newetat[] ){
+        int l=position+naj-1;
+        if (l>(strlen(combin->combinaison)-1)){
+                 printf("impossible de faire la rotation\n");
+        }
+         else{
+            char tempv,tempv1;
+            int i=position;
+                while(i<=l){
+                    tempv=combin->combinaison[i];
+                    tempv1=combin->etat[i];
+                    combin->combinaison[i]=combin->combinaison[l];
+                    if ((combin->etat[l])=='1'){
+                       combin->etat[i]='0';
+                    }
+                    else{
+                        combin->etat[i]='1';
+                    }
+                    combin->combinaison[l]=tempv;
+                    if (tempv1=='1'){
+                       combin->etat[l]='0';
+                    }
+
+                    else{
+                        combin->etat[l]='1';
+                    }
+                    i++;
+                    l--;
+                    }
+            }
+         strcpy((char *)newcombinaison,(char *)combin->combinaison);
+         strcpy((char *)newetat,(char *)combin->etat);
+}
+
+void Creer_Combinaison_Cellule(liste combin,liste tete,int naj){
+    char combine[9];
+    char etat[9];
+    int l=strlen(combin->combinaison)-naj,i;
+    char c1[9];
+    char e1[9];
+    strcpy(c1,(char *)combin->combinaison);
+    strcpy(e1,(char *)combin->etat);
+    Rotation(combin,0,naj,combine,etat);
+    strcpy((char *)tete->combinaison,combine);
+    strcpy((char *)tete->etat,etat);
+    tete->suiv=NULL;
+    liste copytete=tete;
+    for( i=1;i<=l;i++){
+         strcpy((char *)combin->combinaison,c1);
+         strcpy((char *)combin->etat,e1);
+         Rotation(combin,i,naj,combine,etat);
+         Ajouter_Nouv(copytete,combine,etat);
+         copytete=copytete->suiv;
+    }
+    strcpy((char *)combin->combinaison,c1);
+    strcpy((char *)combin->etat,e1);
+}
+
+void all_Combinaison_Cellule(liste tete,int naj){
+    liste ctete,precedent,combin,ccombin;
+     ctete=precedent=combin=ccombin=NULL;
+     ctete=precedent=tete;
+     int i=1;
+     while(ctete!=NULL){
+         combin=malloc(sizeof(cellule));
+         Creer_Combinaison_Cellule(ctete,combin,naj);
+         ccombin=combin;
+         while(ccombin!=NULL){
+            if(Existance(tete,ccombin)==false){
+                Ajouter_Nouv(precedent,ccombin->combinaison,ccombin->etat);
+                precedent=precedent->suiv;
+                i=i+1;
+               }
+               ccombin=ccombin->suiv;
+         }
+         Detruire_Liste(combin);
+         ctete=ctete->suiv;
+   }
+}
+
+void random_string(char * string, size_t length){
+    char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    size_t alphabetsize = strlen(alphabet);
+    size_t index,i;
+    srand(time(NULL));
+    for(i = 0; i<length && alphabetsize > 0; ++i){
+        index = rand() % alphabetsize;
+        string[i] = alphabet[index];
+        alphabet[index] = alphabet[--alphabetsize];
+    }
+    string[i] = '\0';
+}
+
+#endif // FUNCTION_H_INCLUDED
